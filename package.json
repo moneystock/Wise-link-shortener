@@ -1,0 +1,27 @@
+{
+  "name": "wise-link-shortener",
+  "version": "1.0.0",
+  "description": "Acortador de enlaces y analíticas orientado a agencias de marketing (Wise Marketing Agency y Onclusive)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node test_api.js"
+  },
+  "keywords": [
+    "url-shortener",
+    "marketing",
+    "analytics",
+    "qr-code",
+    "sqlite",
+    "express"
+  ],
+  "author": "Wise Marketing Agency",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

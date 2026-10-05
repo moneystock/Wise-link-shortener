@@ -1,0 +1,21 @@
+# render.yaml - Especificación de servicio para Render
+services:
+  - type: web
+    name: wise-links
+    env: node
+    plan: starter # Requiere starter para montar disco persistente en Render
+    buildCommand: npm ci --only=production
+    startCommand: node server.js
+    disk:
+      name: wise-sqlite-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_DIR
+        value: /data
+      - key: BASE_URL
+        value: https://go.wisemarketing.agency

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wise Links | Acortador de URLs & Analíticas de Marketing</title>
+  <meta name="description" content="Plataforma de acortamiento de enlaces con soporte multi-workspace para Wise Marketing Agency y Onclusive. Generación de códigos QR y analítica en tiempo real.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- CDN Externos (QRCode.js & Chart.js) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+</head>
+<body>
+  <!-- Header y Navegación Superior -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Wise<span>Links</span></h1>
+          <span class="brand-tag">Agency Edition</span>
+        </div>
+      </div>
+
+      <!-- Selector Central de Workspace Activo -->
+      <div class="workspace-bar">
+        <span class="workspace-bar-label">Espacio activo:</span>
+        <div class="workspace-switcher" role="radiogroup" aria-label="Espacio de trabajo">
+          <button type="button" class="ws-btn active" data-ws="wise" id="ws-tab-wise" title="Wise Marketing Agency">
+            <span class="ws-indicator ws-wise-dot"></span>
+            Wise Agency
+          </button>
+          <button type="button" class="ws-btn" data-ws="onclusive" id="ws-tab-onclusive" title="Cliente Onclusive">
+            <span class="ws-indicator ws-onclusive-dot"></span>
+            Onclusive
+          </button>
+          <button type="button" class="ws-btn" data-ws="all" id="ws-tab-all" title="Ver todos">
+            Todos
+          </button>
+        </div>
+      </div>
+
+      <!-- Herramientas de la derecha (Tema oscuro/claro y Estado) -->
+      <div class="header-actions">
+        <button id="theme-toggle" class="icon-button" title="Cambiar tema (Claro / Oscuro)" aria-label="Cambiar tema">
+          <svg id="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg id="sun-icon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="content-container">
+
+      <!-- Panel Superior de Métricas Rápidas -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon metric-icon-purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          </div>
+          <div class="metric-data">
+            <span class="metric-label">Enlaces Totales</span>
+            <span class="metric-value" id="stat-total-links">0</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon metric-icon-green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+          </div>
+          <div class="metric-data">
+            <span class="metric-label">Clics Globales</span>
+            <span class="metric-value" id="stat-total-clicks">0</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon metric-icon-wise">
+            <span class="metric-badge">W</span>
+          </div>
+          <div class="metric-data">
+            <span class="metric-label">Wise Marketing</span>
+            <span class="metric-value" id="stat-wise-clicks">0 clics</span>
+            <span class="metric-sub" id="stat-wise-links">0 enlaces</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon metric-icon-onclusive">
+            <span class="metric-badge">O</span>
+          </div>
+          <div class="metric-data">
+            <span class="metric-label">Cliente Onclusive</span>
+            <span class="metric-value" id="stat-onclusive-clicks">0 clics</span>
+            <span class="metric-sub" id="stat-onclusive-links">0 enlaces</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Formulario Principal de Creación de Enlace -->
+      <section class="creator-card">
+        <div class="creator-header">
+          <div class="creator-title-area">
+            <h2>Crear Enlace Corto & Código QR</h2>
+            <p>Optimiza tus campañas de marketing con seguimiento automático de clics y analíticas.</p>
+          </div>
+          <div class="current-workspace-badge" id="form-workspace-indicator">
+            <span class="badge-dot"></span>
+            Asignado a: <strong id="form-workspace-name">Wise Marketing Agency</strong>
+          </div>
+        </div>
+
+        <form id="shorten-form" class="shorten-form" novalidate>
+          <div class="form-row main-url-row">
+            <div class="input-group">
+              <label for="original-url">URL de Destino (Larga) *</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+                </span>
+                <input 
+                  type="url" 
+                  id="original-url" 
+                  placeholder="https://wisemarketing.agency/campana-verano-2026?utm_source=meta" 
+                  required
+                  autocomplete="off"
+                >
+                <button type="button" class="btn-paste" id="btn-paste" title="Pegar desde el portapapeles">
+                  Pegar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid-secondary">
+            <!-- Alias Personalizado -->
+            <div class="input-group">
+              <label for="custom-slug">
+                Alias Personalizado <span class="label-hint">(Opcional)</span>
+              </label>
+              <div class="input-wrapper">
+                <span class="slug-prefix" id="slug-prefix">localhost:3000/</span>
+                <input 
+                  type="text" 
+                  id="custom-slug" 
+                  placeholder="campana-q4" 
+                  pattern="[a-zA-Z0-9_-]+" 
+                  maxlength="40"
+                  autocomplete="off"
+                >
+              </div>
+              <span class="field-help">Solo letras, números, guiones (-) y guiones bajos (_).</span>
+            </div>
+
+            <!-- Asignación de Workspace -->
+            <div class="input-group">
+              <label>Espacio de Trabajo / Cliente *</label>
+              <div class="segmented-control">
+                <label class="segment-option">
+                  <input type="radio" name="form-workspace" value="wise" checked>
+                  <span class="segment-pill segment-wise">
+                    <span class="dot"></span> Wise Agency
+                  </span>
+                </label>
+                <label class="segment-option">
+                  <input type="radio" name="form-workspace" value="onclusive">
+                  <span class="segment-pill segment-onclusive">
+                    <span class="dot"></span> Onclusive
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Expiración Opcional -->
+            <div class="input-group">
+              <label for="expires-at">
+                Fecha de Expiración <span class="label-hint">(Opcional)</span>
+              </label>
+              <input type="datetime-local" id="expires-at" class="input-date">
+              <span class="field-help">El enlace dejará de redirigir tras esta fecha.</span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" id="btn-submit">
+              <span class="btn-spinner hidden" id="submit-spinner"></span>
+              <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span>Generar Enlace Corto & QR</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Tarjeta de Resultado Inmediato (Oculta por defecto) -->
+        <div id="result-card" class="result-card hidden">
+          <div class="result-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            ¡Enlace generado exitosamente!
+          </div>
+
+          <div class="result-body">
+            <div class="result-info">
+              <div class="result-url-display">
+                <span class="result-tag" id="result-workspace-tag">WISE</span>
+                <input type="text" id="result-short-url" readonly>
+                <button type="button" class="btn-action-copy" id="btn-copy-result" title="Copiar enlace">
+                  <svg id="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  <span id="copy-text">Copiar</span>
+                </button>
+                <a href="#" target="_blank" class="btn-action-visit" id="btn-visit-result" title="Probar redirección">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </a>
+              </div>
+
+              <div class="result-dest-info">
+                <span>Destino:</span>
+                <span id="result-original-url" class="result-dest-text"></span>
+              </div>
+            </div>
+
+            <!-- Código QR Dinámico -->
+            <div class="result-qr-box">
+              <div id="result-qr-container" class="qr-preview"></div>
+              <button type="button" class="btn-download-qr" id="btn-download-qr">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Descargar QR (PNG)
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sección de Analítica Visual (Chart.js) -->
+      <section class="analytics-card" id="analytics-section">
+        <div class="section-header">
+          <div class="section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <h3>Rendimiento y Tendencias de Clics</h3>
+          </div>
+          <button class="btn-text-toggle" id="btn-toggle-chart">Ocultar Gráfica</button>
+        </div>
+        <div class="chart-wrapper" id="chart-container">
+          <canvas id="clicksChart" height="90"></canvas>
+        </div>
+      </section>
+
+      <!-- Tabla de Historial de Enlaces -->
+      <section class="links-table-card">
+        <div class="table-card-header">
+          <div class="table-title">
+            <h3>Historial de Enlaces Creados</h3>
+            <span class="links-counter-badge" id="table-count-badge">0 enlaces</span>
+          </div>
+
+          <div class="table-toolbar">
+            <div class="search-input-wrapper">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="search-input" placeholder="Buscar por alias o URL original...">
+            </div>
+
+            <button class="btn-refresh" id="btn-refresh-table" title="Recargar lista">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="links-table">
+            <thead>
+              <tr>
+                <th>Enlace Corto</th>
+                <th>URL Original</th>
+                <th>Espacio</th>
+                <th>Clics</th>
+                <th>Fecha Creación</th>
+                <th class="th-actions">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="links-table-body">
+              <tr>
+                <td colspan="6" class="loading-state">
+                  <div class="skeleton-loader">Cargando enlaces...</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Modal para Visualización / Descarga de Código QR -->
+  <div class="modal-overlay hidden" id="qr-modal">
+    <div class="modal-content modal-qr">
+      <button class="modal-close" id="btn-close-qr-modal" aria-label="Cerrar modal">&times;</button>
+      <div class="modal-header">
+        <h3 id="qr-modal-title">Código QR</h3>
+        <p id="qr-modal-url" class="mono-text"></p>
+      </div>
+      <div class="modal-qr-body">
+        <div id="modal-qr-container" class="qr-box"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary" id="btn-download-modal-qr">
+          Descargar QR en Alta Resolución (.PNG)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Analítica y Logs de Clics por Enlace -->
+  <div class="modal-overlay hidden" id="stats-modal">
+    <div class="modal-content modal-stats">
+      <button class="modal-close" id="btn-close-stats-modal" aria-label="Cerrar modal">&times;</button>
+      <div class="modal-header">
+        <h3 id="stats-modal-title">Registro de Auditoría de Clics</h3>
+        <p id="stats-modal-subtitle" class="mono-text"></p>
+      </div>
+      <div class="modal-stats-body">
+        <div class="stats-summary-strip">
+          <div class="stat-pill">
+            <span>Clics registrados:</span>
+            <strong id="modal-clicks-count">0</strong>
+          </div>
+          <div class="stat-pill">
+            <span>Workspace:</span>
+            <strong id="modal-clicks-ws">-</strong>
+          </div>
+        </div>
+        <div class="clicks-log-container">
+          <table class="clicks-log-table">
+            <thead>
+              <tr>
+                <th>Fecha y Hora</th>
+                <th>Dirección IP</th>
+                <th>Navegador / Dispositivo (User-Agent)</th>
+              </tr>
+            </thead>
+            <tbody id="clicks-log-body">
+              <tr>
+                <td colspan="3" class="empty-state">Sin clics registrados aún.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de Alertas Toast -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Pie de página -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p>WiseLinks &copy; 2026. Diseñado para <strong>Wise Marketing Agency</strong> & <strong>Onclusive</strong>.</p>
+      <p class="footer-sub">Arquitectura Local Node.js + Express + SQLite (Costo $0).</p>
+    </div>
+  </footer>
+
+  <!-- Script Principal -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
