@@ -49,9 +49,9 @@ function getLinkUrl(req, workspace, shortCode) {
     return `${protocol}://${host}/${shortCode}`;
   }
 
-  // En producción, si el enlace pertenece a Onclusive, usar su subdominio dedicado
-  if (workspace && workspace.toLowerCase() === 'onclusive') {
-    return `https://onclusive.wisemarketing.agency/${shortCode}`;
+  // En producción, si el enlace pertenece a un cliente específico diferente de 'wise'
+  if (workspace && workspace.toLowerCase() !== 'wise') {
+    return `https://${workspace.toLowerCase()}.wisemarketing.agency/${shortCode}`;
   }
 
   // Para Wise Agency o por defecto
@@ -322,8 +322,11 @@ app.get('/:short_code', (req, res) => {
     const host = (req.get('host') || '').toLowerCase();
     let link = null;
 
-    if (host.startsWith('onclusive.')) {
-      link = db.prepare('SELECT * FROM links WHERE short_code = ? AND workspace = "onclusive"').get(short_code);
+    // Detectar si la petición proviene de un subdominio de cliente (ej: onclusive.wisemarketing.agency)
+    const hostParts = host.split('.');
+    if (hostParts.length > 2 && hostParts[0] !== 'go' && hostParts[0] !== 'www' && hostParts[0] !== 'wise-link-shortener') {
+      const clientWorkspace = hostParts[0];
+      link = db.prepare('SELECT * FROM links WHERE short_code = ? AND workspace = ?').get(short_code, clientWorkspace);
     }
 
     if (!link) {
