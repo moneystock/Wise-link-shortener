@@ -70,7 +70,7 @@ function initTheme() {
       const isDark = e.matches;
       const defaultIcon = document.querySelector('link[rel="icon"]:not([media])');
       if (defaultIcon) {
-        defaultIcon.href = isDark ? '/favicon-dark.png' : '/favicon-light.png';
+        defaultIcon.href = isDark ? '/favicon-dark.png?v=2' : '/favicon-light.png?v=2';
       }
     };
     updateFavicon(mediaQuery);
