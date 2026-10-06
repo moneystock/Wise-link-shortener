@@ -62,6 +62,24 @@ function initTheme() {
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     applyTheme(newTheme);
   });
+
+  // Asegurar compatibilidad de favicon con el esquema de color del navegador / sistema
+  if (window.matchMedia) {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const updateFavicon = (e) => {
+      const isDark = e.matches;
+      const defaultIcon = document.querySelector('link[rel="icon"]:not([media])');
+      if (defaultIcon) {
+        defaultIcon.href = isDark ? '/favicon-dark.png' : '/favicon-light.png';
+      }
+    };
+    updateFavicon(mediaQuery);
+    try {
+      mediaQuery.addEventListener('change', updateFavicon);
+    } catch (_) {
+      mediaQuery.addListener?.(updateFavicon);
+    }
+  }
 }
 
 function applyTheme(theme) {
