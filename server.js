@@ -103,9 +103,9 @@ app.post('/api/links', (req, res) => {
     // Validación de URL
     const validatedUrl = normalizeUrl(original_url);
 
-    // Validación de Workspace
-    const normalizedWorkspace = (workspace && workspace.toLowerCase() === 'onclusive') 
-      ? 'onclusive' 
+    // Validación de Workspace (acepta 'wise', 'hvb' o cualquier identificador de cliente alfanumérico)
+    const normalizedWorkspace = (workspace && typeof workspace === 'string' && /^[a-zA-Z0-9_-]{2,30}$/.test(workspace.trim())) 
+      ? workspace.trim().toLowerCase() 
       : 'wise';
 
     let finalShortCode = short_code ? short_code.trim() : null;
@@ -190,7 +190,7 @@ app.get('/api/links', (req, res) => {
     const { workspace } = req.query;
     let stmt;
 
-    if (workspace && (workspace === 'wise' || workspace === 'onclusive')) {
+    if (workspace && workspace !== 'all') {
       stmt = db.prepare('SELECT * FROM links WHERE workspace = ? ORDER BY created_at DESC');
       const rows = stmt.all(workspace);
       const data = rows.map(r => ({ ...r, short_url: getLinkUrl(req, r.workspace, r.short_code) }));
@@ -269,7 +269,7 @@ app.get('/api/stats/overview', (req, res) => {
     const totalClicks = db.prepare('SELECT COALESCE(SUM(clicks_count), 0) as count FROM links').get().count;
 
     const wiseLinks = db.prepare("SELECT COUNT(*) as count, COALESCE(SUM(clicks_count), 0) as clicks FROM links WHERE workspace = 'wise'").get();
-    const onclusiveLinks = db.prepare("SELECT COUNT(*) as count, COALESCE(SUM(clicks_count), 0) as clicks FROM links WHERE workspace = 'onclusive'").get();
+    const hvbLinks = db.prepare("SELECT COUNT(*) as count, COALESCE(SUM(clicks_count), 0) as clicks FROM links WHERE workspace = 'hvb'").get();
 
     // Clics agrupados por fecha (últimos 7 días)
     const timeline = db.prepare(`
@@ -295,7 +295,7 @@ app.get('/api/stats/overview', (req, res) => {
         totalClicks,
         workspaces: {
           wise: { links: wiseLinks.count, clicks: wiseLinks.clicks },
-          onclusive: { links: onclusiveLinks.count, clicks: onclusiveLinks.clicks }
+          hvb: { links: hvbLinks.count, clicks: hvbLinks.clicks }
         },
         timeline,
         topLinks

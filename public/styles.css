@@ -32,6 +32,10 @@
   --onclusive-bg: rgba(14, 165, 233, 0.12);
   --onclusive-border: rgba(14, 165, 233, 0.35);
 
+  --hvb-color: #00b4d8;
+  --hvb-bg: rgba(0, 180, 216, 0.12);
+  --hvb-border: rgba(0, 180, 216, 0.35);
+
   --success: #10b981;
   --success-bg: rgba(16, 185, 129, 0.15);
   --danger: #f43f5e;
@@ -81,6 +85,10 @@
   --onclusive-color: #0284c7;
   --onclusive-bg: #e0f2fe;
   --onclusive-border: #7dd3fc;
+
+  --hvb-color: #0077b6;
+  --hvb-bg: #e0f7fa;
+  --hvb-border: #90e0ef;
 
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
@@ -264,6 +272,7 @@ body::before {
 
 .ws-wise-dot { background-color: var(--wise-color); }
 .ws-onclusive-dot { background-color: var(--onclusive-color); }
+.ws-hvb-dot { background-color: var(--hvb-color); }
 
 /* Botones de Cabecera */
 .header-actions {
@@ -358,6 +367,11 @@ body::before {
 .metric-icon-onclusive {
   background: var(--onclusive-bg);
   color: var(--onclusive-color);
+}
+
+.metric-icon-hvb {
+  background: var(--hvb-bg);
+  color: var(--hvb-color);
 }
 
 .metric-data {
@@ -625,6 +639,13 @@ body::before {
   border: 1px solid var(--onclusive-border);
 }
 
+.segment-option input:checked + .segment-hvb {
+  background: var(--hvb-bg);
+  color: var(--hvb-color);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--hvb-border);
+}
+
 /* Botón de Enviar Principal */
 .btn-primary {
   background: var(--primary-gradient);
@@ -732,6 +753,11 @@ body::before {
 .result-tag.onclusive {
   background: var(--onclusive-bg);
   color: var(--onclusive-color);
+}
+
+.result-tag.hvb {
+  background: var(--hvb-bg);
+  color: var(--hvb-color);
 }
 
 #result-short-url {
@@ -1084,6 +1110,12 @@ body::before {
   background: var(--onclusive-bg);
   color: var(--onclusive-color);
   border: 1px solid var(--onclusive-border);
+}
+
+.ws-badge.hvb {
+  background: var(--hvb-bg);
+  color: var(--hvb-color);
+  border: 1px solid var(--hvb-border);
 }
 
 /* Badges de Clics */

@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function getSelectedFormWorkspace() {
   const selectedRadio = document.querySelector('input[name="form-workspace"]:checked');
   if (selectedRadio) return selectedRadio.value;
-  return state.currentWorkspace === 'onclusive' ? 'onclusive' : 'wise';
+  return state.currentWorkspace !== 'all' ? state.currentWorkspace : 'wise';
 }
 
 // Actualizar el prefijo visual del alias según el workspace / cliente seleccionado
@@ -42,8 +42,8 @@ function updateSlugPrefix() {
   }
 
   const ws = getSelectedFormWorkspace();
-  if (ws === 'onclusive') {
-    prefixEl.textContent = 'onclusive.wisemarketing.agency/';
+  if (ws !== 'wise') {
+    prefixEl.textContent = `${ws}.wisemarketing.agency/`;
   } else {
     prefixEl.textContent = 'go.wisemarketing.agency/';
   }
@@ -126,16 +126,16 @@ function updateWorkspaceUI() {
   const formWsIndicator = document.getElementById('form-workspace-name');
   const formWsBadge = document.getElementById('form-workspace-indicator');
   const radioWise = document.querySelector('input[name="form-workspace"][value="wise"]');
-  const radioOnclusive = document.querySelector('input[name="form-workspace"][value="onclusive"]');
+  const radioHvb = document.querySelector('input[name="form-workspace"][value="hvb"]');
 
-  if (state.currentWorkspace === 'onclusive') {
-    if (formWsIndicator) formWsIndicator.textContent = 'Cliente Onclusive';
-    if (radioOnclusive) radioOnclusive.checked = true;
-    formWsBadge?.classList.add('onclusive-mode');
+  if (state.currentWorkspace === 'hvb') {
+    if (formWsIndicator) formWsIndicator.textContent = 'Cliente HVB';
+    if (radioHvb) radioHvb.checked = true;
+    formWsBadge?.classList.add('hvb-mode');
   } else {
     if (formWsIndicator) formWsIndicator.textContent = 'Wise Marketing Agency';
     if (radioWise) radioWise.checked = true;
-    formWsBadge?.classList.remove('onclusive-mode');
+    formWsBadge?.classList.remove('hvb-mode');
   }
   updateSlugPrefix();
 }
@@ -156,8 +156,8 @@ function setupEventListeners() {
     radio.addEventListener('change', (e) => {
       const formWsIndicator = document.getElementById('form-workspace-name');
       if (formWsIndicator) {
-        formWsIndicator.textContent = e.target.value === 'onclusive' 
-          ? 'Cliente Onclusive' 
+        formWsIndicator.textContent = e.target.value === 'hvb' 
+          ? 'Cliente HVB' 
           : 'Wise Marketing Agency';
       }
       updateSlugPrefix();
@@ -341,11 +341,7 @@ function displayResult(link) {
   visitBtn.href = link.short_url;
 
   tagSpan.textContent = link.workspace.toUpperCase();
-  if (link.workspace === 'onclusive') {
-    tagSpan.className = 'result-tag onclusive';
-  } else {
-    tagSpan.className = 'result-tag';
-  }
+  tagSpan.className = `result-tag ${link.workspace || 'wise'}`;
 
   // Generar código QR dinámico
   renderQRCode(qrContainer, link.short_url, 130);
@@ -482,8 +478,8 @@ function renderLinksTable(links) {
 
   tbody.innerHTML = links.map(link => {
     const formattedDate = formatDate(link.created_at);
-    const wsClass = link.workspace === 'onclusive' ? 'onclusive' : 'wise';
-    const wsLabel = link.workspace === 'onclusive' ? 'Onclusive' : 'Wise Agency';
+    const wsClass = link.workspace || 'wise';
+    const wsLabel = link.workspace === 'wise' ? 'Wise Agency' : (link.workspace === 'hvb' ? 'HVB' : link.workspace.toUpperCase());
     const hasClicksClass = link.clicks_count > 0 ? 'has-clicks' : '';
 
     return `
@@ -670,7 +666,7 @@ async function openStatsModal(id) {
     title.textContent = `Auditoría de Clics: /${link.short_code}`;
     subtitle.textContent = link.original_url;
     clicksCount.textContent = link.clicks_count;
-    clicksWs.textContent = link.workspace === 'onclusive' ? 'Onclusive' : 'Wise Marketing Agency';
+    clicksWs.textContent = link.workspace === 'wise' ? 'Wise Marketing Agency' : (link.workspace === 'hvb' ? 'HVB Ingeniería' : link.workspace.toUpperCase());
 
     if (!link.recent_clicks || link.recent_clicks.length === 0) {
       logTbody.innerHTML = `<tr><td colspan="3" class="empty-state">Este enlace aún no ha recibido visitas.</td></tr>`;
@@ -711,8 +707,10 @@ async function loadOverviewStats() {
     document.getElementById('stat-wise-clicks').textContent = `${stats.workspaces.wise.clicks} clics`;
     document.getElementById('stat-wise-links').textContent = `${stats.workspaces.wise.links} enlaces`;
 
-    document.getElementById('stat-onclusive-clicks').textContent = `${stats.workspaces.onclusive.clicks} clics`;
-    document.getElementById('stat-onclusive-links').textContent = `${stats.workspaces.onclusive.links} enlaces`;
+    const hvbClicksEl = document.getElementById('stat-hvb-clicks');
+    const hvbLinksEl = document.getElementById('stat-hvb-links');
+    if (hvbClicksEl && stats.workspaces.hvb) hvbClicksEl.textContent = `${stats.workspaces.hvb.clicks} clics`;
+    if (hvbLinksEl && stats.workspaces.hvb) hvbLinksEl.textContent = `${stats.workspaces.hvb.links} enlaces`;
 
     // Renderizar gráfico
     renderChart(stats);
@@ -743,8 +741,8 @@ function renderChart(stats) {
     values = stats.timeline.map(t => t.count);
   } else {
     // Si aún no hay clics en timeline, mostrar distribución por workspace
-    labels = ['Wise Marketing', 'Cliente Onclusive'];
-    values = [stats.workspaces.wise.clicks, stats.workspaces.onclusive.clicks];
+    labels = ['Wise Marketing', 'Cliente HVB'];
+    values = [stats.workspaces.wise?.clicks || 0, stats.workspaces.hvb?.clicks || 0];
   }
 
   if (state.chartInstance) {
