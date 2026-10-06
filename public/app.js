@@ -720,8 +720,8 @@ function renderChart(stats) {
       datasets: [{
         label: 'Clics registrados',
         data: values.length ? values : [0],
-        backgroundColor: isDark ? 'rgba(99, 102, 241, 0.7)' : 'rgba(79, 70, 229, 0.8)',
-        borderColor: '#6366f1',
+        backgroundColor: isDark ? 'rgba(255, 106, 0, 0.75)' : 'rgba(255, 106, 0, 0.85)',
+        borderColor: '#ff6a00',
         borderWidth: 1.5,
         borderRadius: 6,
       }]

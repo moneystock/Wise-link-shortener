@@ -3,4 +3,5 @@ database.sqlite*
 *.sqlite-journal
 *.sqlite-wal
 *.sqlite-shm
+subir_a_github.bat
 .DS_Store
