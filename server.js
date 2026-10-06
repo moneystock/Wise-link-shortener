@@ -39,6 +39,25 @@ function getBaseUrl(req) {
   return `${protocol}://${host}`;
 }
 
+// Función para generar la URL pública de marca según el workspace / cliente
+function getLinkUrl(req, workspace, shortCode) {
+  const host = (req.get('host') || `localhost:${PORT}`).toLowerCase();
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+
+  // En entorno local de pruebas, mantener localhost
+  if (host.includes('localhost') || host.includes('127.0.0.1')) {
+    return `${protocol}://${host}/${shortCode}`;
+  }
+
+  // En producción, si el enlace pertenece a Onclusive, usar su subdominio dedicado
+  if (workspace && workspace.toLowerCase() === 'onclusive') {
+    return `https://onclusive.wisemarketing.agency/${shortCode}`;
+  }
+
+  // Para Wise Agency o por defecto
+  return `https://go.wisemarketing.agency/${shortCode}`;
+}
+
 // Generador de código corto único (alfanumérico, amigable)
 function generateShortCode(length = 6) {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -146,14 +165,13 @@ app.post('/api/links', (req, res) => {
 
     const result = stmt.run(validatedUrl, finalShortCode, normalizedWorkspace, finalExpiresAt);
     const newLink = db.prepare('SELECT * FROM links WHERE id = ?').get(result.lastInsertRowid);
-    const baseUrl = getBaseUrl(req);
 
     return res.status(201).json({
       success: true,
       message: 'Enlace acortado con éxito.',
       data: {
         ...newLink,
-        short_url: `${baseUrl}/${newLink.short_code}`
+        short_url: getLinkUrl(req, newLink.workspace, newLink.short_code)
       }
     });
 
@@ -175,15 +193,13 @@ app.get('/api/links', (req, res) => {
     if (workspace && (workspace === 'wise' || workspace === 'onclusive')) {
       stmt = db.prepare('SELECT * FROM links WHERE workspace = ? ORDER BY created_at DESC');
       const rows = stmt.all(workspace);
-      const baseUrl = getBaseUrl(req);
-      const data = rows.map(r => ({ ...r, short_url: `${baseUrl}/${r.short_code}` }));
+      const data = rows.map(r => ({ ...r, short_url: getLinkUrl(req, r.workspace, r.short_code) }));
       return res.json({ success: true, count: data.length, data });
     }
 
     stmt = db.prepare('SELECT * FROM links ORDER BY created_at DESC');
     const rows = stmt.all();
-    const baseUrl = getBaseUrl(req);
-    const data = rows.map(r => ({ ...r, short_url: `${baseUrl}/${r.short_code}` }));
+    const data = rows.map(r => ({ ...r, short_url: getLinkUrl(req, r.workspace, r.short_code) }));
 
     return res.json({ success: true, count: data.length, data });
   } catch (error) {
@@ -210,12 +226,11 @@ app.get('/api/links/:id', (req, res) => {
       LIMIT 50
     `).all(id);
 
-    const baseUrl = getBaseUrl(req);
     return res.json({
       success: true,
       data: {
         ...link,
-        short_url: `${baseUrl}/${link.short_code}`,
+        short_url: getLinkUrl(req, link.workspace, link.short_code),
         recent_clicks: clicks
       }
     });
@@ -304,7 +319,16 @@ app.get('/:short_code', (req, res) => {
   }
 
   try {
-    const link = db.prepare('SELECT * FROM links WHERE short_code = ?').get(short_code);
+    const host = (req.get('host') || '').toLowerCase();
+    let link = null;
+
+    if (host.startsWith('onclusive.')) {
+      link = db.prepare('SELECT * FROM links WHERE short_code = ? AND workspace = "onclusive"').get(short_code);
+    }
+
+    if (!link) {
+      link = db.prepare('SELECT * FROM links WHERE short_code = ?').get(short_code);
+    }
 
     if (!link) {
       return res.status(404).send(`

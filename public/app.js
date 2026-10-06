@@ -23,11 +23,29 @@ document.addEventListener('DOMContentLoaded', () => {
   loadLinks();
 });
 
-// Actualizar el prefijo visual del alias con el host actual
+// Función para obtener el workspace seleccionado en el formulario
+function getSelectedFormWorkspace() {
+  const selectedRadio = document.querySelector('input[name="form-workspace"]:checked');
+  if (selectedRadio) return selectedRadio.value;
+  return state.currentWorkspace === 'onclusive' ? 'onclusive' : 'wise';
+}
+
+// Actualizar el prefijo visual del alias según el workspace / cliente seleccionado
 function updateSlugPrefix() {
   const prefixEl = document.getElementById('slug-prefix');
-  if (prefixEl) {
+  if (!prefixEl) return;
+
+  const host = window.location.host.toLowerCase();
+  if (host.includes('localhost') || host.includes('127.0.0.1')) {
     prefixEl.textContent = `${window.location.host}/`;
+    return;
+  }
+
+  const ws = getSelectedFormWorkspace();
+  if (ws === 'onclusive') {
+    prefixEl.textContent = 'onclusive.wisemarketing.agency/';
+  } else {
+    prefixEl.textContent = 'go.wisemarketing.agency/';
   }
 }
 
@@ -101,6 +119,7 @@ function updateWorkspaceUI() {
     if (radioWise) radioWise.checked = true;
     formWsBadge?.classList.remove('onclusive-mode');
   }
+  updateSlugPrefix();
 }
 
 // ==========================================
@@ -123,6 +142,7 @@ function setupEventListeners() {
           ? 'Cliente Onclusive' 
           : 'Wise Marketing Agency';
       }
+      updateSlugPrefix();
     });
   });
 
